@@ -34,7 +34,7 @@ async def lifespan(app: fastapi.FastAPI) -> collections.abc.AsyncIterator[None]:
 app = fastapi.FastAPI(
     title=api.core.config.settings.PROJECT_NAME,
     description="A self-hosted Proton calendar read-only API that can be used to read events.",
-    version="0.4.0",
+    version="0.5.0",
     debug=api.core.config.settings.DEBUG,
     lifespan=lifespan,
     license_info={

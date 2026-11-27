@@ -8,6 +8,12 @@
 
 A self-hosted Proton calendar RO API that can be used to read the calendar events.
 
+> Not affiliated with Proton AG.
+
+The interactive API documentation is at `/docs` (Swagger UI) and `/redoc`:
+
+![Swagger UI][openapi-screenshot]
+
 ## Technologies
 
 - [![python][python-shield]][python-url]
@@ -22,11 +28,12 @@ A self-hosted Proton calendar RO API that can be used to read the calendar event
 Create a share link in Proton Calendar (`Settings → Calendars → Share → Share with anyone`), then:
 
 ```sh
+X_API_KEY="$(openssl rand -hex 32)"
 docker run -d -p 8080:80 \
   -e TIMEZONE=Europe/Rome \
-  -e X_API_KEY="$(openssl rand -hex 32)" \
+  -e X_API_KEY="$X_API_KEY" \
   -e PROTON_CALENDAR_URL='https://calendar.proton.me/api/calendar/v1/url/.../calendar.ics?CacheKey=...&PassphraseKey=...' \
-  xcalts/protoncalendar-ro-api:0.4.0
+  xcalts/protoncalendar-ro-api:0.5.0
 ```
 
 | Variable              | Required | Description                                                                             |
@@ -36,6 +43,35 @@ docker run -d -p 8080:80 \
 | `PROTON_CALENDAR_URL` | yes      | The Proton Calendar share link. |
 | `DEBUG`               | no       | `true` enables debug logging. Default: `false`.                                         |
 | `UVICORN_PORT`        | no       | Port to listen on inside the container. Default: `80`.                                  |
+
+## Usage
+
+Get the events of a day (`DD-Mon-YYYY`):
+
+```sh
+curl -H "X-API-KEY: $X_API_KEY" http://localhost:8080/events/11-Dec-2025
+```
+
+```json
+[
+  {
+    "calendar": "Personal",
+    "name": "Birthday",
+    "time_start": "",
+    "time_end": "",
+    "timezone": "Europe/Rome"
+  },
+  {
+    "calendar": "Personal",
+    "name": "Dentist",
+    "time_start": "09:00",
+    "time_end": "09:45",
+    "timezone": "Europe/Rome"
+  }
+]
+```
+
+All-day events come first, with empty `time_start` and `time_end`. 
 
 ## Developing
 
@@ -69,13 +105,14 @@ ruff format api tests
 [dockerhub-shield]: https://img.shields.io/docker/pulls/xcalts/protoncalendar-ro-api?logo=docker
 [version-shield]: https://img.shields.io/github/v/tag/xcalts/protoncalendar-ro-api?sort=semver&label=version
 [version-url]: https://github.com/xcalts/protoncalendar-ro-api/blob/main/CHANGELOG.md
+[openapi-screenshot]: https://raw.githubusercontent.com/xcalts/protoncalendar-ro-api/main/.github/openapi.png
 [python-shield]: https://img.shields.io/badge/Python3.12+-black?logo=python
 [python-url]: https://www.python.org/
 [fastapi-shield]: https://img.shields.io/badge/FastAPI-black?logo=fastapi
 [fastapi-url]: https://fastapi.tiangolo.com/
 [pydantic-shield]: https://img.shields.io/badge/Pydantic-black?logo=pydantic
 [pydantic-url]: https://docs.pydantic.dev/
-[uvicorn-shield]: https://img.shields.io/badge/Uvicorn-black
+[uvicorn-shield]: https://img.shields.io/badge/Uvicorn-black?logo=python
 [uvicorn-url]: https://www.uvicorn.dev/
 [docker-shield]: https://img.shields.io/badge/Docker-black?logo=docker
 [docker-url]: https://hub.docker.com/r/xcalts/protoncalendar-ro-api
