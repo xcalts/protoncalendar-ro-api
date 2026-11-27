@@ -1,6 +1,6 @@
 [project]
 name = "protoncalendar-ro-api"
-version = "0.5.0"
+version = "0.6.0"
 description = "Proton Calendar has no public API. This gives you one: any day's events as JSON."
 readme = "README.md"
 license = "GPL-3.0-only"
