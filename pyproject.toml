@@ -1,6 +1,6 @@
 [project]
 name = "protoncalendar-ro-api"
-version = "0.2.0"
+version = "0.3.0"
 description = "A self-hosted Proton calendar read-only API that can be used to read events. "
 readme = "README.md"
 license = "GPL-3.0-only"
