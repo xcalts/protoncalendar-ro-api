@@ -51,6 +51,8 @@ def test_versions_are_in_sync():
     assert re.search(
         r'variable "VERSION_TAG" \{\s*default = "' + re.escape(version) + '"', bake
     )
+    readme = (ROOT / "README.md").read_text()
+    assert re.findall(r"protoncalendar-ro-api:(\S+)", readme) == [version]
 
 
 def _normalize(name: str) -> str:

@@ -88,6 +88,17 @@ awk -v version="$NEW_VERSION" '
 ' docker-bake.hcl > tmp && mv tmp docker-bake.hcl
 echo "   → docker-bake.hcl updated."
 
+# -----------------------------
+# Update version in "README.md"
+# -----------------------------
+echo "[-] Updating version in 'README.md'..."
+awk -v version="$NEW_VERSION" '
+  # The Docker image tag in the "docker run" example, e.g. "protoncalendar-ro-api:1.2.3".
+  { gsub(/protoncalendar-ro-api:[0-9]+\.[0-9]+\.[0-9]+/, "protoncalendar-ro-api:" version) }
+  { print }
+' README.md > tmp && mv tmp README.md
+echo "   → README.md updated."
+
 # --------------
 # Commit changes
 # --------------
