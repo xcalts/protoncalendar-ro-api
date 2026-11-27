@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 
-ARG PYTHON_IMAGE=python:3.14.10-slim-trixie@sha256:9aaa474097d094040649f2162a627c0049b408f52138d980916788d80f04802f
+ARG PYTHON_IMAGE=python:3.14.10-slim-trixie@sha256:22eafb370920ad8b429e0aec3fff433e0669968519f5d60469d83729c138b28b
 
 #
 # Build stage: install the runtime dependencies into a virtual environment.
@@ -14,18 +14,15 @@ ENV PIP_NO_CACHE_DIR=1 \
 
 WORKDIR /app
 COPY pyproject.toml ./
-# Install the [project] dependencies of pyproject.toml, not the project itself (the
-# application code is copied as-is below). pip cannot install only the dependencies
-# of a project, so they are read with tomllib. The development tools
-# ([dependency-groups] dev) never enter the image. "pip check" fails the build if
-# the installed packages are inconsistent.
+
 RUN python -c 'import tomllib; print(*tomllib.load(open("pyproject.toml", "rb"))["project"]["dependencies"], sep="\n")' > requirements.txt \
- && python -m venv /app/.venv \
- && /app/.venv/bin/pip install -r requirements.txt \
- && /app/.venv/bin/pip check
+ && python -m venv --without-pip /app/.venv \
+ && python -m pip --python /app/.venv/bin/python install -r requirements.txt \
+ && python -m pip --python /app/.venv/bin/python check
 
 #
-# Runtime stage: no build tooling, unprivileged user, read-only application files.
+# Runtime stage: no build tooling (pip included), the latest Debian security updates,
+# unprivileged user, read-only application files.
 #
 
 FROM ${PYTHON_IMAGE}
@@ -36,7 +33,11 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     UVICORN_HOST=0.0.0.0 \
     UVICORN_PORT=80
 
-RUN useradd --system --uid 10001 --no-create-home --shell /usr/sbin/nologin app
+RUN apt-get update \
+ && DEBIAN_FRONTEND=noninteractive apt-get upgrade -y \
+ && rm -rf /var/lib/apt/lists/* \
+ && python -m pip uninstall -y pip \
+ && useradd --system --uid 10001 --no-create-home --shell /usr/sbin/nologin app
 
 WORKDIR /app
 COPY --from=build /app/.venv /app/.venv

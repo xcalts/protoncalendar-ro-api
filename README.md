@@ -1,5 +1,3 @@
-<a id="readme-top"></a>
-
 [![coverage][coverage-shield]][coverage-url]
 [![CI][ci-shield]][ci-url]
 [![CD][cd-shield]][cd-url]
@@ -19,8 +17,6 @@ A self-hosted Proton calendar RO API that can be used to read the calendar event
 - [![docker][docker-shield]][docker-url]
 - [![protoncalendar][protoncalendar-shield]][protoncalendar-url]
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
 ## Running
 
 Create a share link in Proton Calendar (`Settings → Calendars → Share → Share with anyone`), then:
@@ -30,7 +26,7 @@ docker run -d -p 8080:80 \
   -e TIMEZONE=Europe/Rome \
   -e X_API_KEY="$(openssl rand -hex 32)" \
   -e PROTON_CALENDAR_URL='https://calendar.proton.me/api/calendar/v1/url/.../calendar.ics?CacheKey=...&PassphraseKey=...' \
-  xcalts/protoncalendar-ro-api:0.3.0
+  xcalts/protoncalendar-ro-api:0.4.0
 ```
 
 | Variable              | Required | Description                                                                             |
@@ -41,12 +37,7 @@ docker run -d -p 8080:80 \
 | `DEBUG`               | no       | `true` enables debug logging. Default: `false`.                                         |
 | `UVICORN_PORT`        | no       | Port to listen on inside the container. Default: `80`.                                  |
 
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
 ## Developing
-
-Requires Python 3.12 or newer (3.14 is used for the Docker image).
 
 ```sh
 # Create a virtual environment and install the dependencies (including the development tools).
@@ -69,8 +60,6 @@ ruff check --fix api tests
 ruff format api tests
 ```
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
 [coverage-shield]: https://img.shields.io/badge/coverage-100%25-brightgreen
 [coverage-url]: https://github.com/xcalts/protoncalendar-ro-api/actions/workflows/develop.yml
 [ci-shield]: https://img.shields.io/github/actions/workflow/status/xcalts/protoncalendar-ro-api/develop.yml?label=CI
@@ -79,7 +68,7 @@ ruff format api tests
 [cd-url]: https://github.com/xcalts/protoncalendar-ro-api/actions/workflows/main.yml
 [dockerhub-shield]: https://img.shields.io/docker/pulls/xcalts/protoncalendar-ro-api?logo=docker
 [version-shield]: https://img.shields.io/github/v/tag/xcalts/protoncalendar-ro-api?sort=semver&label=version
-[version-url]: CHANGELOG.md
+[version-url]: https://github.com/xcalts/protoncalendar-ro-api/blob/main/CHANGELOG.md
 [python-shield]: https://img.shields.io/badge/Python3.12+-black?logo=python
 [python-url]: https://www.python.org/
 [fastapi-shield]: https://img.shields.io/badge/FastAPI-black?logo=fastapi
@@ -87,7 +76,7 @@ ruff format api tests
 [pydantic-shield]: https://img.shields.io/badge/Pydantic-black?logo=pydantic
 [pydantic-url]: https://docs.pydantic.dev/
 [uvicorn-shield]: https://img.shields.io/badge/Uvicorn-black
-[uvicorn-url]: https://www.uvicorn.org/
+[uvicorn-url]: https://www.uvicorn.dev/
 [docker-shield]: https://img.shields.io/badge/Docker-black?logo=docker
 [docker-url]: https://hub.docker.com/r/xcalts/protoncalendar-ro-api
 [protoncalendar-shield]: https://img.shields.io/badge/Proton%20Calendar-black?logo=protoncalendar
