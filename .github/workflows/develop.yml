@@ -85,6 +85,10 @@ jobs:
             echo "::error::Dev dependencies were installed in the image."
             exit 1
           fi
+          if docker exec api python -c "import pip" 2>/dev/null; then
+            echo "::error::pip is installed in the image."
+            exit 1
+          fi
 
           echo "Becomes healthy"
           for _ in $(seq 1 30); do
