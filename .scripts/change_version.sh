@@ -104,7 +104,7 @@ echo "   → README.md updated."
 # --------------
 echo "[-] Staging and committing version bump..."
 git add -A
-git commit -m "feat: bump to version $NEW_VERSION"
+git commit -m "feat(version): $NEW_VERSION."
 echo "   → Commit created."
 
 # -----------
