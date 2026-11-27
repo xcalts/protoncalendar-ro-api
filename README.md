@@ -26,7 +26,7 @@ docker run -d -p 8080:80 \
   -e TIMEZONE=Europe/Rome \
   -e X_API_KEY="$(openssl rand -hex 32)" \
   -e PROTON_CALENDAR_URL='https://calendar.proton.me/api/calendar/v1/url/.../calendar.ics?CacheKey=...&PassphraseKey=...' \
-  xcalts/protoncalendar-ro-api:0.3.0
+  xcalts/protoncalendar-ro-api:0.4.0
 ```
 
 | Variable              | Required | Description                                                                             |
