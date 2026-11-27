@@ -1,0 +1,51 @@
+[project]
+name = "protoncalendar-ro-api"
+version = "0.1.0"
+description = "A self-hosted Proton calendar read-only API that can be used to read events. "
+readme = "README.md"
+license = "GPL-3.0-only"
+requires-python = ">=3.12"
+dependencies = [
+    # Web framework for building APIs (routing, dependency injection, validation)
+    "fastapi==0.162.0",
+    # Environment-based configuration management (Pydantic v2 settings)
+    "pydantic-settings==2.16.2",
+    # ASGI server used to run FastAPI (development & production)
+    "uvicorn==0.54.0",
+    # HTTP client used to download the calendar (also used by FastAPI's TestClient)
+    "httpx==0.28.1",
+    # Icalendar parser library for Python
+    "icalendar==7.3.0",
+    # Query ICS calendars for occurrences of events, todos, journal entries and alarms
+    "recurring-ical-events==3.8.2",
+    # IANA time zone database (slim container images do not ship one)
+    "tzdata==2026.6",
+]
+
+[dependency-groups]
+dev = [
+    # Testing framework
+    "pytest==9.2.0",
+    # Test coverage reporting
+    "pytest-cov==7.1.0",
+    # HTTP client used by Starlette's TestClient (it deprecated plain httpx)
+    "httpx2==2.16.0",
+    # Linter and formatter (also sorts imports and removes unused ones)
+    "ruff==0.17.5",
+]
+
+[tool.pytest.ini_options]
+addopts = "-v --cov=api --cov-report=term-missing --cov-fail-under=100"
+testpaths = ["tests"]
+
+[tool.coverage.run]
+branch = true
+
+[tool.ruff]
+line-length = 88
+target-version = "py312"
+
+[tool.ruff.lint]
+# Pyflakes, the pycodestyle errors and import sorting. Listed explicitly so that a
+# Ruff upgrade cannot change the rules (its defaults differ between versions).
+select = ["E4", "E7", "E9", "F", "I"]
