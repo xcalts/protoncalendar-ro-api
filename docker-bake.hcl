@@ -7,7 +7,7 @@ variable "IMAGE" {
 }
 
 variable "VERSION_TAG" { 
-    default = "0.5.0"
+    default = "0.6.0"
 }
 
 target "protoncalendar-ro-api" {
