@@ -6,9 +6,9 @@
 
 # Proton calendar RO REST API
 
-A self-hosted Proton calendar RO API that can be used to read the calendar events.
-
 > Not affiliated with Proton AG.
+
+Proton Calendar has no public API. This gives you one: a self-hosted, read-only REST API that returns the events of any day as JSON, straight from your calendar's share link.
 
 The interactive API documentation is at `/docs` (Swagger UI) and `/redoc`:
 
@@ -43,6 +43,8 @@ docker run -d -p 8080:80 \
 | `PROTON_CALENDAR_URL` | yes      | The Proton Calendar share link. |
 | `DEBUG`               | no       | `true` enables debug logging. Default: `false`.                                         |
 | `UVICORN_PORT`        | no       | Port to listen on inside the container. Default: `80`.                                  |
+
+> **The share link is a secret.** It contains the key that decrypts your calendar, so anyone who has it can read your events. The API never writes it to its logs (not even with `DEBUG=true`) and only ever sends it to `calendar.proton.me`. It is still visible through `docker inspect` and in your shell history if you type it on the command line, so prefer `--env-file` with a file only you can read. If the link leaks, delete it in Proton Calendar and create a new one.
 
 ## Usage
 

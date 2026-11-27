@@ -1,9 +1,21 @@
 [project]
 name = "protoncalendar-ro-api"
 version = "0.5.0"
-description = "A self-hosted Proton calendar read-only API that can be used to read events. "
+description = "Proton Calendar has no public API. This gives you one: any day's events as JSON."
 readme = "README.md"
 license = "GPL-3.0-only"
+authors = [{ name = "xcalts" }]
+keywords = [
+    "proton",
+    "proton-calendar",
+    "calendar",
+    "icalendar",
+    "ics",
+    "rest-api",
+    "fastapi",
+    "self-hosted",
+    "docker",
+]
 requires-python = ">=3.12"
 dependencies = [
     # Web framework for building APIs (routing, dependency injection, validation)
@@ -21,6 +33,13 @@ dependencies = [
     # IANA time zone database (slim container images do not ship one)
     "tzdata==2026.6",
 ]
+
+[project.urls]
+Homepage = "https://github.com/xcalts/protoncalendar-ro-api"
+Source = "https://github.com/xcalts/protoncalendar-ro-api"
+Issues = "https://github.com/xcalts/protoncalendar-ro-api/issues"
+Changelog = "https://github.com/xcalts/protoncalendar-ro-api/blob/main/CHANGELOG.md"
+Docker = "https://hub.docker.com/r/xcalts/protoncalendar-ro-api"
 
 [dependency-groups]
 dev = [
