@@ -1,27 +1,15 @@
-name: CI
+name: develop
 
 on:
   push:
-    branches: [develop, main]
-  pull_request:
-  # Reused by the release workflow, so an image is only published if CI passes.
-  workflow_call:
+    tags: ["[0-9]+.[0-9]+.[0-9]+"]
 
 permissions:
   contents: read
 
-concurrency:
-  group: ci-${{ github.ref }}
-  cancel-in-progress: true
-
-env:
-  PIP_DISABLE_PIP_VERSION_CHECK: "1"
-
 jobs:
-  lint:
-    name: Lint
+  ci-lint:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -29,9 +17,6 @@ jobs:
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
           python-version-file: .python-version
-          cache: pip
-          cache-dependency-path: pyproject.toml
-      # "--group" (dependency groups of pyproject.toml) needs pip 25.1 or newer.
       - name: Install the development tools
         run: |
           python -m pip install pip==26.3
@@ -41,10 +26,8 @@ jobs:
       - name: ruff format
         run: python -m ruff format --check --diff api tests
 
-  test:
-    name: Test (Python ${{ matrix.python-version }})
+  ci-test:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
     strategy:
       fail-fast: false
       matrix:
@@ -56,45 +39,29 @@ jobs:
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
           python-version: ${{ matrix.python-version }}
-          cache: pip
-          cache-dependency-path: pyproject.toml
-      # The project (editable) brings its [project] dependencies, "--group dev" the
-      # development tools. "--group" needs pip 25.1 or newer.
       - name: Install dependencies
         run: |
           python -m pip install pip==26.3
           python -m pip install -e . --group dev
           python -m pip check
-      - name: Run the tests (fails below 100% coverage)
+      - name: Run the tests
         run: python -m pytest -W error
 
-  docker:
-    name: Docker image
+  ci-docker:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
-    env:
-      IMAGE: protoncalendar-ro-api:ci
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
       - name: Build
-        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
-        with:
-          context: .
-          load: true
-          push: false
-          tags: ${{ env.IMAGE }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+        run: docker build -t protoncalendar-ro-api .
       - name: Smoke test
         run: |
           set -euo pipefail
           docker run -d --name api -p 8080:80 \
             -e TIMEZONE=Europe/Athens -e X_API_KEY=ci-smoke-test \
             -e PROTON_CALENDAR_URL=https://calendar.proton.me/api/calendar/v1/url/ci-smoke-test/calendar.ics \
-            "$IMAGE"
+            protoncalendar-ro-api
           trap 'docker logs api' EXIT
 
           for _ in $(seq 1 30); do
@@ -114,7 +81,6 @@ jobs:
 
           echo "Contains no secrets, sources or dev tooling"
           test "$(docker exec api ls -A /app | LC_ALL=C sort | tr '\n' ' ')" = ".venv api "
-          # (an "if", because "set -e" ignores failures of commands negated with "!")
           if docker exec api python -c "import pytest" 2>/dev/null; then
             echo "::error::Dev dependencies were installed in the image."
             exit 1
@@ -127,3 +93,42 @@ jobs:
             sleep 2
           done
           test "$status" = healthy
+
+  ci-pull-request:
+    needs: [ci-lint, ci-test, ci-docker]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Open the pull request to main
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          if ! git merge-base --is-ancestor "$GITHUB_SHA" origin/develop; then
+            echo "::error::Version $VERSION is not on develop."
+            exit 1
+          fi
+
+          body="$RUNNER_TEMP/body.md"
+          awk -v heading="## [v$VERSION]" '
+            index($0, "## [") == 1 { section = index($0, heading) == 1; next }
+            section
+          ' CHANGELOG.md > "$body"
+          if ! grep -q '[^[:space:]]' "$body"; then
+            echo "::error::CHANGELOG.md has no '## [v$VERSION]' section."
+            exit 1
+          fi
+
+          pr="$(gh pr list --base main --head develop --json number --jq '.[].number')"
+          if [ -n "$pr" ]; then
+            gh pr edit "$pr" --title "Release $VERSION" --body-file "$body"
+          else
+            gh pr create --base main --head develop --title "Release $VERSION" --body-file "$body"
+          fi
